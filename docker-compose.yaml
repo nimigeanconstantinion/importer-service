@@ -1,0 +1,19 @@
+version: '3.8'
+
+networks:
+  mynet:
+    driver: bridge
+
+volumes:
+  db_data:
+
+services:
+
+  query-service:
+    image: ion21/importer-service:v2
+    networks:
+      - mynet
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
