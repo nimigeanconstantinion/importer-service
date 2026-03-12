@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: importer
+  datasource:
+    url: jdbc:mysql://78.96.25.131:3306/test_db
+    username: root
+    password: R@0t
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: HikariPool
+      minimum-idle: 5
+      maximum-pool-size: 10
+      idle-timeout: 60000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost/keycloak/realms/rsk/protocol/openid-connect/certs
+
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowed-origins: "http://localhost:5000,http://localhost:3000,http://127.0.0.1:8000,http://localhost/keycloak"  # Updated to reflect the gateway's address if served through the gateway.
+            allowed-methods: "GET, POST, PUT, DELETE, OPTIONS"
+            allowed-headers: "Authorization, Content-Type, Accept"
+            allow-credentials: true
+            max-age: 1800 # 30 minutes
+
+
+app:
+  security:
+    expected-issuer: http://localhost/keycloak/realms/rsk
+
+server:
+  port: 8082
