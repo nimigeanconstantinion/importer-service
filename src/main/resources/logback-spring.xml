@@ -1,0 +1,17 @@
+<configuration>
+  <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+  <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+  <springProperty name="LOGSTASH_HOST" source="app.elk.logstash-host" defaultValue="logstash" />
+  <springProperty name="LOGSTASH_PORT" source="app.elk.logstash-port" defaultValue="5044" />
+
+  <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+    <destination>${LOGSTASH_HOST}:${LOGSTASH_PORT}</destination>
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE" />
+    <appender-ref ref="LOGSTASH" />
+  </root>
+</configuration>
