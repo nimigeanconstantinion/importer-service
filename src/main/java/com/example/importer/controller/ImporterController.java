@@ -2,6 +2,7 @@ package com.example.importer.controller;
 
 import com.example.importer.model.MapStocOptim;
 import com.example.importer.service.MapStocOptService;
+import com.example.importer.service.MessagePublisherService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +18,17 @@ import net.logstash.logback.argument.StructuredArguments.*;
 import static net.logstash.logback.argument.StructuredArguments.*;
 
 @RestController
-@RequestMapping("/api/v1/import")
+@RequestMapping("/api/v1/importer")
 //@CrossOrigin
 public class ImporterController {
 
     private MapStocOptService mapStocOptService;
+    private MessagePublisherService messagePublisherService;
     private static final Logger log = LoggerFactory.getLogger(ImporterController.class);
-    public ImporterController(MapStocOptService mapStocOptService) {
+    public ImporterController(MapStocOptService mapStocOptService,MessagePublisherService messagePublisherService) {
+
         this.mapStocOptService = mapStocOptService;
+        this.messagePublisherService=messagePublisherService;
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -38,6 +42,25 @@ public class ImporterController {
                 value("sizeList", lista.size()));
 
         return ResponseEntity.ok(lista);
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/sync")
+    public ResponseEntity<List<MapStocOptim>> synchro(HttpServletRequest request){
+
+        List<MapStocOptim> lista=mapStocOptService.getAllMapStocOpt();
+        log.info("Create message request received",
+                keyValue("eventType", "IMPORTER_MESSAGE"),
+                keyValue("importedBulk", "IMPORTED"),
+                value("sizeList", lista.size()));
+
+            for (MapStocOptim m:lista){
+                    messagePublisherService.publishCreate(m);
+                    System.out.println(m.getArticol());
+            }
+            return ResponseEntity.ok(lista);
+
+
     }
 
     @ResponseStatus(HttpStatus.OK)
