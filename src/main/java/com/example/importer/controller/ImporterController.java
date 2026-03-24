@@ -18,7 +18,7 @@ import net.logstash.logback.argument.StructuredArguments.*;
 import static net.logstash.logback.argument.StructuredArguments.*;
 
 @RestController
-@RequestMapping("/api/v1/importer")
+@RequestMapping("/api/v1/query")
 //@CrossOrigin
 public class ImporterController {
 
