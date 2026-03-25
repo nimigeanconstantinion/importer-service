@@ -153,7 +153,6 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
 
-                        // orice altceva – necesită token
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
