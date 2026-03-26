@@ -26,6 +26,8 @@ public class MapStocOptimImportScheduler {
     public void runImport() {
         log.info("Triggering scheduled product import");
         List<MapStocOptim> lista=mapStocOptService.getAllMapStocOpt();
-        lista.stream().map(p->messagePublisherService.publishCreate(p));
+        for(MapStocOptim m:lista){
+            messagePublisherService.publishCreate(m);
+        }
     }
 }
