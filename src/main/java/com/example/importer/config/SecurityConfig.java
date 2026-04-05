@@ -165,6 +165,10 @@ public class SecurityConfig {
     // 🔐 JWT Decoder (servlet)
     @Bean
     public JwtDecoder jwtDecoder() {
+        System.out.println("KSET="+jwkSetUri);
+
+        System.out.println("KEXP="+expectedIssuer);
+
 
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
 
