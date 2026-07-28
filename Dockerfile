@@ -14,3 +14,4 @@ COPY src src
 RUN ./mvnw package -DskipTests
 
 ENTRYPOINT ["java","-jar","/app/target/importer-service-0.0.1-SNAPSHOT.jar"]
+

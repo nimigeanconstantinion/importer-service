@@ -1,65 +1,137 @@
+#spring:
+#  application:
+#    name: importer
+#  datasource:
+#    url: jdbc:mysql://78.96.25.131:3306/test_db
+#    username: root
+#    password: R@0t
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    hikari:
+#      pool-name: HikariPool
+#      minimum-idle: 5
+#      maximum-pool-size: 10
+#      idle-timeout: 60000
+#      connection-timeout: 30000
+#      max-lifetime: 1800000
+#  sql:
+#    init:
+#      mode: never
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQLDialect
+#        format_sql: true
+#    show-sql: true
+#
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          jwk-set-uri: http://localhost/keycloak/realms/rsk/protocol/openid-connect/certs
+#
+#  Kafka:
+#    bootstrap-servers: localhost:30001
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#      properties:
+#        spring.json.add.type.headers: false
+#
+#app:
+#  security:
+#    expected-issuer: http://localhost/keycloak/realms/rsk
+#  cors:
+#    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost,http://localhost:3000,http://localhost:4200}
+#  kafka:
+#    topic: product-topic
+#  elk:
+#    elasticsearch-uri: https://resurse-app-elasticsearch:9200
+#    kibana-base-url: http://resurse-app-kibana:5601/kibana
+#    logstash-host: 127.0.0.1
+#    logstash-port: 30544
+#
+#springdoc:
+#  swagger-ui:
+#    path: /swagger-ui.html
+#  api-docs:
+#    path: /v3/api-docs
+#
+#logging:
+#  config: classpath:logback-spring.xml
+#
+#server:
+#  port: 8082
+server:
+  port: ${SERVER_PORT:8082}
+  forward-headers-strategy: framework
+  tomcat:
+    use-relative-redirects: true
+  servlet:
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost,http://localhost:3000,http://localhost:4200}
+  kafka:
+    topic: ${APP_KAFKA_TOPIC:product-topic}
+  elk:
+    elasticsearch-uri: ${ELASTICSEARCH_URI:https://resurse-app-elasticsearch:9200}
+    kibana-base-url: ${KIBANA_BASE_URL:http://localhost/kibana}
+    logstash-host: ${LOGSTASH_HOST:127.0.0.1}
+    logstash-port: ${LOGSTASH_PORT:30544}
+  security:
+    expected-issuer: http://localhost/keycloak/realms/rsk
+
+
 spring:
-  application:
-    name: importer
   datasource:
-    url: jdbc:mysql://78.96.25.131:3306/test_db
-    username: root
-    password: R@0t
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      pool-name: HikariPool
-      minimum-idle: 5
-      maximum-pool-size: 10
-      idle-timeout: 60000
-      connection-timeout: 30000
-      max-lifetime: 1800000
-  sql:
-    init:
-      mode: never
+    url: ${MYSQL_URL:jdbc:mysql://78.96.25.131:3306/test_db}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:R@0t}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
     show-sql: true
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:30001}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:consumer-local}
+      enable-auto-commit: true
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.example.data_service.model.MessageEvent
   security:
     oauth2:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost/keycloak/realms/rsk/protocol/openid-connect/certs
 
-  Kafka:
-    bootstrap-servers: localhost:30001
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        spring.json.add.type.headers: false
-
-app:
-  security:
-    expected-issuer: http://localhost/keycloak/realms/rsk
-  cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost,http://localhost:3000,http://localhost:4200}
-  kafka:
-    topic: product-topic
-  elk:
-    elasticsearch-uri: https://resurse-app-elasticsearch:9200
-    kibana-base-url: http://resurse-app-kibana:5601/kibana
-    logstash-host: 127.0.0.1
-    logstash-port: 30544
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+    config-url: ../v3/api-docs/swagger-config
+    url: ../v3/api-docs
+    oauth:
+      client-id: ${SWAGGER_CLIENT_ID:demo-client}
+      use-pkce-with-authorization-code-grant: true
   api-docs:
     path: /v3/api-docs
-
 logging:
   config: classpath:logback-spring.xml
+  level:
+    org.springframework.kafka: INFO
+    org.apache.kafka.clients.consumer: INFO
 
-server:
-  port: 8082
+

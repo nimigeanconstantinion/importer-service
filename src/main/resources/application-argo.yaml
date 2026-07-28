@@ -1,0 +1,75 @@
+server:
+  port: ${SERVER_PORT:8082}
+  forward-headers-strategy: framework
+  tomcat:
+    use-relative-redirects: true
+  servlet:
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/}
+
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://client,http://client:3000,http://localhost:4200}
+  kafka:
+    topic: ${APP_KAFKA_TOPIC:product-topic}
+  elk:
+    elasticsearch-uri: ${ELASTICSEARCH_URI:https://elasticsearch:9200}
+    kibana-base-url: ${KIBANA_BASE_URL:http://localhost/kibana}
+    logstash-host: ${LOGSTASH_HOST:local-ms-logstash}
+  #    logstash-port: ${LOGSTASH_PORT:30544}
+  security:
+    expected-issuer: ${KEYCLOAK_ISSUER:http://localhost/keycloak/realms/rsk}
+
+# ADAUGĂ ASTA AICI:
+keycloak:
+  auth-server-url: ${KEYCLOAK_SERVER_URL:http://local-ms-keycloak.local-namespace.svc.cluster.local}
+  realm: ${KEYCLOAK_REALM:rsk}
+  resource: ${KEYCLOAK_CLIENT_ID:register-user}
+  credentials:
+    secret: ${KEYCLOAK_CLIENT_SECRET}
+
+
+spring:
+  datasource:
+    url: ${MYSQL_URL:jdbc:mysql://78.96.25.131:3306/test_db}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:R@0t}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    show-sql: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:30001}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:consumer-local}
+      enable-auto-commit: true
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.example.data_service.model.MessageEvent
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost/keycloak/realms/rsk/protocol/openid-connect/certs}
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: ../v3/api-docs/swagger-config
+    url: ../v3/api-docs
+  api-docs:
+    path: /v3/api-docs
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    org.springframework.kafka: INFO
+    org.apache.kafka.clients.consumer: INFO

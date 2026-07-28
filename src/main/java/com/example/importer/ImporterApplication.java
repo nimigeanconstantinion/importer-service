@@ -4,11 +4,13 @@ import com.example.importer.config.CorsProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableConfigurationProperties(CorsProperties.class)
 @EnableScheduling
+@EnableKafka
 public class ImporterApplication {
 
 	public static void main(String[] args) {
