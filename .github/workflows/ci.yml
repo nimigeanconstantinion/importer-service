@@ -53,7 +53,7 @@ jobs:
           token: ${{ secrets.GITOPS_PAT }}      # PAT least-privilege (vezi §6)
       - name: Bump image tag în gitops
         env:
-          VALUES: business/rsk/data-service/values.yaml
+          VALUES: business/rsk/importer-service/values.yaml
         run: |
           test -f "$VALUES" || { echo "::error::$VALUES nu există în ms-gitops — refactor nepushuit?"; exit 1; }
           sed -i -E "s|^(  tag: ).*|\1${{ needs.publish.outputs.tag }}|" "$VALUES"
