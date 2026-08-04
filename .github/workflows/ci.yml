@@ -63,5 +63,5 @@ jobs:
             echo "Tag deja ${{ needs.publish.outputs.tag }} — nimic de comis."
             exit 0
           fi
-          git commit -am "ci: data-service -> ${{ needs.publish.outputs.tag }}"
+          git commit -am "ci: importer-service -> ${{ needs.publish.outputs.tag }}"
           git push
