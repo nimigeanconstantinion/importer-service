@@ -1,8 +1,6 @@
-FROM eclipse-temurin:17-jdk-alpine
-
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /app
-EXPOSE 8082
 
 COPY mvnw .
 COPY .mvn .mvn
@@ -14,5 +12,11 @@ RUN ./mvnw dependency:go-offline -B
 COPY src src
 RUN ./mvnw package -DskipTests
 
-ENTRYPOINT ["java","-jar","/app/target/importer-service-0.0.1-SNAPSHOT.jar"]
+FROM eclipse-temurin:17-jre
 
+WORKDIR /app
+EXPOSE 8082
+
+COPY --from=build /app/target/importer-service-0.0.1-SNAPSHOT.jar app.jar
+
+ENTRYPOINT ["java","-jar","/app/app.jar"]

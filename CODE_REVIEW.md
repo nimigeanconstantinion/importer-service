@@ -18,6 +18,62 @@
 
 ---
 
+## Update — după commit-urile `a7521bf` → `7504887` (2026-08-05)
+
+Ai reparat deja, corect:
+
+- **B1 (producer Kafka)** ✅ — `spring.kafka.producer` cu `JsonSerializer` + `spring.json.add.type.headers: false`, pus în **ambele** fișiere (`application.yaml:104-108`, `application-argo.yaml:47-51`). N-ai căzut în capcana din M2: ai reparat în amândouă odată.
+- **B2 (credențiale)** ✅ — `${MYSQL_USERNAME}` / `${MYSQL_PASSWORD}` fără default. Acum, dacă secret-ul lipsește, aplicația nu pornește și îți spune de ce, în loc să se conecteze tăcut cu root.
+- **C6** ✅ — `System.out.println` comentat în bucla de sync.
+
+Două lucruri de corectat:
+
+### ⚠️ Corecție la C3 — recomandarea de imagine era greșită
+
+**Recomandarea mea inițială (`eclipse-temurin:17-jre-alpine`) e greșită și e cauza celor 3 pipeline-uri roșii.** Variantele `-alpine` de Temurin sunt publicate **doar pentru `linux/amd64`**. CI-ul cere `platforms: linux/amd64,linux/arm64` (`ci.yml:38`), buildx caută manifestul arm64, nu-l găsește, și se oprește înainte de build:
+
+```
+ERROR: failed to solve: eclipse-temurin:17-jre-alpine:
+  no match for platform in manifest: not found
+```
+
+Nu e diferența `jre` vs `jdk` — e sufixul `-alpine`. Imaginile fără sufix (bazate pe Ubuntu) au și `amd64`, și `arm64`:
+
+```dockerfile
+FROM eclipse-temurin:17-jdk AS build
+WORKDIR /app
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
+RUN ./mvnw dependency:go-offline -B
+COPY src src
+RUN ./mvnw package -DskipTests
+
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+EXPOSE 8082
+COPY --from=build /app/target/importer-service-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java","-jar","/app/app.jar"]
+```
+
+Asta rezolvă și partea de multi-stage din C3 (Maven nu mai rămâne în imaginea finală).
+
+**Lecția, care e mai valoroasă decât fix-ul:** „imagine mai mică" și „imagine multi-arch" sunt două cerințe care se pot bate cap în cap. Alpine e mic pentru că folosește musl în loc de glibc, iar asta înseamnă build-uri separate pe care nu toți furnizorii le publică pentru toate arhitecturile. Înainte să alegi un tag pentru un build multi-arch, verifică ce arhitecturi are:
+
+```bash
+docker buildx imagetools inspect eclipse-temurin:17-jre | grep -i platform
+docker buildx imagetools inspect eclipse-temurin:17-jre-alpine | grep -i platform
+```
+
+Dacă vrei să tai și cele ~6 minute de build: cu multi-arch, Maven compilează de două ori, a doua oară sub emulare QEMU. Alternativa e să construiești jar-ul **o singură dată** în runner (ai deja `setup-java` în job-ul `build-test`), să-l urci ca artifact, iar Dockerfile-ul să facă doar `COPY app.jar` — atunci multi-arch înseamnă doar două layere de bază, nu două compilări.
+
+### ⚠️ C5 luat invers
+
+`config/CorsProperties.java:8` — ai schimbat `@ConfigurationProperties(prefix = "cors")` în `@ConfigurationProperties` fără prefix. Clasa rămâne moartă (CORS-ul real vine din `CorsConfig.java:15`, prin `@Value`), doar că acum se leagă la rădăcina configului în loc de un prefix inexistent. C5 cerea **ștergerea** clasei și a lui `@EnableConfigurationProperties` din `ImporterApplication.java:11`, nu ajustarea prefixului.
+
+---
+
 ## 🔴 Critice
 
 ### B1 — Kafka producer fără serializer: niciun mesaj nu pleacă
