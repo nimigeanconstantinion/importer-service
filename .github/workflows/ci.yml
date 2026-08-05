@@ -39,7 +39,7 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE }}:${{ steps.meta.outputs.sha7 }}
-#            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:latest
 
   cd-bump:                            # închide bucla CI -> CD
     needs: publish
