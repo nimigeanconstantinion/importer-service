@@ -13,7 +13,7 @@ import java.util.List;
 //import java.util.logging.Logger;
 import lombok.extern.slf4j.Slf4j;
 
-import net.logstash.logback.argument.StructuredArguments.*;
+//import net.logstash.logback.argument.StructuredArguments.*;
 
 import static net.logstash.logback.argument.StructuredArguments.*;
 
@@ -56,7 +56,7 @@ public class ImporterController {
 
             for (MapStocOptim m:lista){
                     messagePublisherService.publishCreate(m);
-                    System.out.println(m.getArticol());
+//                    System.out.println(m.getArticol());
             }
             return ResponseEntity.ok(lista);
 

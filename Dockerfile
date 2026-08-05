@@ -1,4 +1,4 @@
-FROM openjdk:17.0.1-slim
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 EXPOSE 8082

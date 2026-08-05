@@ -1,6 +1,6 @@
 <configuration>
   <include resource="org/springframework/boot/logging/logback/defaults.xml" />
-  <springProperty name="APP" source="spring.application.name" defaultValue="importer" />
+  <springProperty name="APP" source="spring.application.name" defaultValue="importer-service" />
   <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="net.logstash.logback.encoder.LogstashEncoder">
       <customFields>{"app_name":"${APP}"}</customFields>
