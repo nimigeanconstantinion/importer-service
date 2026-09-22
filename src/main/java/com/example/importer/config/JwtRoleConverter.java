@@ -15,10 +15,12 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
 
     private static final String RESOURCE_ACCESS = "resource_access";
     private static final String REALM_ACCESS = "realm_access";
+    private static final String GROUPS = "groups";
     private static final String ROLES = "roles";
     private static final String API_CLIENT = "spring-api";
     private static final String ROLE_PREFIX = "ROLE_";
     private static final String SCOPE_PREFIX = "SCOPE_";
+    private static final String GROUP_PREFIX = "GROUP_";
 
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
@@ -26,7 +28,19 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
         Set<GrantedAuthority> authorities = new HashSet<>();
         extractRealmRoles(jwt).forEach(role -> authorities.add(new SimpleGrantedAuthority(withRolePrefix(role))));
         extractClientRoles(jwt).forEach(role -> authorities.add(new SimpleGrantedAuthority(withScopePrefix(role))));
+        extractGroups(jwt).forEach(group -> authorities.add(new SimpleGrantedAuthority(withGroupPrefix(group))));
         return authorities;
+    }
+
+    private Collection<String> extractGroups(Jwt jwt) {
+        Object groups = jwt.getClaim(GROUPS);
+        if (!(groups instanceof Collection<?> rawGroups)) {
+            return Set.of();
+        }
+        return rawGroups.stream()
+                .map(Object::toString)
+                .map(group -> group.startsWith("/") ? group.substring(1) : group)
+                .collect(Collectors.toSet());
     }
 
     private Collection<String> extractRealmRoles(Jwt jwt) {
@@ -64,5 +78,9 @@ public class JwtRoleConverter implements Converter<Jwt, Collection<GrantedAuthor
 
     private String withScopePrefix(String role) {
         return role.startsWith(SCOPE_PREFIX) ? role : SCOPE_PREFIX + role;
+    }
+
+    private String withGroupPrefix(String group) {
+        return group.startsWith(GROUP_PREFIX) ? group : GROUP_PREFIX + group;
     }
 }
