@@ -153,7 +153,8 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
 
-                        .anyRequest().authenticated()
+                        // orice altceva – necesită token + apartenență la grupul aprobat (/users sau /admins)
+                        .anyRequest().hasAnyAuthority("GROUP_users", "GROUP_admins")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
